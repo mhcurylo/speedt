@@ -29,9 +29,12 @@ library:
   - conduit   
   - conduit-combinators
   - conduit-extra
+  - containers  
+  - unordered-containers  
   - strict-concurrency
   - deepseq
   - vector
+  - hashtables
   - time  
 
 executables:
@@ -45,6 +48,7 @@ executables:
     dependencies:
     - speedt
     - bytestring
+    - containers  
 
 tests:
   speedt-test:
@@ -58,3 +62,4 @@ tests:
     - speedt
     - bytestring
     - criterion
+    - time  

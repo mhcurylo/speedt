@@ -29,6 +29,6 @@ emptyPlay = Play "" 0 ""
 
 playsFromFileC :: String -> IO [Play]
 playsFromFileC file = do
-  e <-runConduitRes $ (C.sourceFile file .| C.lines .| mapC parsePlay .| maximumC)
-  return $ [fromJust e]
+  e <-runConduitRes $ (C.sourceFile file .| C.lines .| mapC parsePlay .| sinkNull)
+  return $ [emptyPlay]
 

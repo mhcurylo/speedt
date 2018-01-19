@@ -1,8 +1,9 @@
 module Main where
 
-import Lib
+import qualified Data.IntMap.Strict as IM
+import Acc
 
 main :: IO ()
 main = do
-  p <- playsFromFileC "fixtures/large_sample" 
-  print $ show p
+  p <- accIMPFromFileC "fixtures/large_sample" 
+  print $ show . fst $ IM.findMax p
