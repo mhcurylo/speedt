@@ -35,6 +35,8 @@ library:
   - deepseq
   - vector
   - hashtables
+  - stm-conduit  
+  - stm
   - time  
 
 executables:

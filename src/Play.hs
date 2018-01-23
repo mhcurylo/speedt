@@ -2,7 +2,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 
-module Date where
+module Play where
 
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Conduit.Binary as C
@@ -14,11 +14,14 @@ import Data.Maybe (fromJust)
 import Data.List (maximum, zip3)
 import Conduit
 
-data DPlay = DPlay {
-    dplayer :: !B.ByteString
-  , dscore  :: !Int
-  , ddate   :: !Int
+data Play = Play {
+    file   :: !Int
+  , date   :: !Int
+  , player :: !B.ByteString
+  , score  :: !Int
 } deriving (Show, Eq, Ord, Generic, NFData)
+
+-- FUNCTIONS FOR CALCULATING DATE AS DAYS FROM
 
 type DayOfYear = (Int, Int, Int)
 
@@ -69,76 +72,26 @@ dayHMap = dm
                   then B.cons '0' bs
                   else bs
   toKV dat@(d, m, y) = (B.intercalate "-" $ map (ensure2 . B.pack . show) [d,m,y], day dat)
-  !dm = HM.fromList $ map toKV $ take 20000 allDays
+  !dm = HM.fromList $ map toKV $ take 30000 allDays
 
 dayHM d = case HM.lookup d dayHMap of
   (Just r) -> r
-  (Nothing) -> fst . parseDate $ d
+  (Nothing) -> undefined 
 
-parseDate :: B.ByteString -> (Int, B.ByteString)
-parseDate bs = (i, ys)
-  where
-  !(d,ds) = fromJust $ B.readInt bs 
-  !(m,ms) = fromJust $ B.readInt (B.tail ds) 
-  !(y,ys) = fromJust $ B.readInt (B.tail ms) 
-  !i = day (d, m, y)
+-- END OF DATE CALCULATION
 
-parseDateHM :: B.ByteString -> (Int, B.ByteString)
-parseDateHM bs = (i, vs)
+parseDate :: B.ByteString -> Int
+parseDate bs = i
   where
-  !(v,vs) = B.break (=='\n') bs 
+  (v,vs) = B.break (=='\n') bs 
   !i = dayHM v
 
-parseDPlays :: B.ByteString -> [DPlay]
-parseDPlays s = if B.null r' 
-  then p : []
-  else p : (parseDPlays r')
+parsePlay :: Int -> B.ByteString -> Play
+parsePlay f s = Play f d p sc
   where
-  !(p,r) = parseDP s
-  !r' = B.tail r
-
-parseDP :: B.ByteString -> (DPlay, B.ByteString)
-parseDP s = (DPlay a b d, ds)
-  where
-  !(a,as) = B.break (==',') s
+  !(p,as) = B.break (==',') s
   !as' = B.tail as
-  !(b,bs) = fromJust $ B.readInt as'
-  !(d,ds) = parseDate (B.tail bs)
+  !(sc,bs) = fromJust $ B.readInt as'
+  !d = parseDate (B.tail bs)
 
-parseDPlaysHM :: B.ByteString -> [DPlay]
-parseDPlaysHM s = if B.null r'
-  then p : []
-  else p : (parseDPlaysHM r')
-  where
-  !(p,r) = parseDPHM s
-  !r' = B.tail r
-
-parseDPHM :: B.ByteString -> (DPlay, B.ByteString)
-parseDPHM s = (DPlay a b d, ds)
-  where
-  !(a,as) = B.break (==',') s
-  !as' = B.tail as
-  !(b,bs) = fromJust $ B.readInt as'
-  !(d,ds) = parseDateHM (B.tail bs)
-
-emptyPlay = DPlay "" 0 0
-
-dplaysFromFileHM :: String -> IO [DPlay]
-dplaysFromFileHM  file = do
-  f <- B.readFile file
-  return $ parseDPlaysHM f 
-
-dplaysFromFile :: String -> IO [DPlay]
-dplaysFromFile  file = do
-  f <- B.readFile file
-  return $ parseDPlays f 
-
-dplaysFromFileC :: String -> IO [DPlay]
-dplaysFromFileC file = do
-  e <-runConduitRes $ (C.sourceFile file .| C.lines .| mapC parseDP .| sinkNull)
-  return $ [emptyPlay]
-
-dplaysFromFileCHM :: String -> IO [DPlay]
-dplaysFromFileCHM file = do
-  e <-runConduitRes $ (C.sourceFile file .| C.lines .| mapC parseDPHM .| sinkNull)
-  return $ [emptyPlay]
+emptyPlay = Play 0 0 "" 0

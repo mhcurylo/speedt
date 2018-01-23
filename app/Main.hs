@@ -5,5 +5,4 @@ import Acc
 
 main :: IO ()
 main = do
-  p <- accIMPFromFileC "fixtures/large_sample" 
-  print $ show . fst $ IM.findMax p
+  print $ "poo" 
