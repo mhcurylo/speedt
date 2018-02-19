@@ -13,8 +13,13 @@ import Acc
 import PlayerId
 import FileData
 
-main = fileDataTest
-
+main = do
+  fileDataTest
+  playIdTest
+  dateTests
+  accTests
+  playsTests 
+  wcTests 
 
 exampleLine :: ByteString
 exampleLine = "All,19000,20-11-2012\n"
@@ -49,7 +54,7 @@ playIdTest = do
     , bench "MVar HashTable"      $ whnfIO (insertPidHtM mht "boo")
     ]
 
-dateTests = [
+dateTests = defaultMain [
     bench "fromGregorian" $ nf (fromGregorian 2012 11) 20
   , bench "parse 1 line" $ nf sParseP exampleLine
   , bench "dparse 1 line" $ nf parseDP exampleLine
@@ -89,7 +94,7 @@ accTests = do
     ]
 
 
-playsTests = [
+playsTests = defaultMain [
 --    bench "plays fixtures/sample"  $ nfIO (playsFromFile "fixtures/sample")
     bench "conduit plays fixtures/sample"  $ nfIO (playsFromFileC "fixtures/sample")
   , bench "conduit dplays fixture/sample" $ nfIO (dplaysFromFileC "fixtures/sample")
@@ -107,7 +112,7 @@ playsTests = [
   ] 
 
 
-wcTests = [
+wcTests = defaultMain [
     bench "wc  fixtures/sample"  $ nfIO (wc "fixtures/sample")
   , bench "strictWc fixtures/sample"  $ nfIO (strictWc "fixtures/sample")
   , bench "conduitWc fixtures/sample"  $ nfIO (conduitWc "fixtures/sample")
